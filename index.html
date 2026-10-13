@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="跨境单品售价计算器" />
+  <title>跨境单品售价计算器</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">CROSS-BORDER PRICING</p>
+        <h1>跨境<span>单品售价</span>计算器</h1>
+        <p class="subtitle">从成本、平台费率与目标利润率，快速反推建议售价。</p>
+      </div>
+      <div class="exchange-pill" aria-label="美元兑人民币汇率">
+        <span>汇率</span><strong>1 USD = <output id="headerExchange">6.7</output> CNY</strong>
+      </div>
+    </header>
+
+    <section class="workspace" aria-label="售价计算工作区">
+      <section class="card inputs-card">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">01 · 参数输入</p>
+            <h2>成本与费率</h2>
+          </div>
+          <button class="text-button" id="resetButton" type="button">恢复示例</button>
+        </div>
+
+        <div class="field-grid">
+          <label class="field"><span>采购成本 <em>¥</em></span><input id="purchaseCost" type="number" min="0" step="0.1" value="20" /></label>
+          <label class="field"><span>国内物流 <em>¥</em></span><input id="domesticShipping" type="number" min="0" step="0.1" value="6" /></label>
+          <label class="field"><span>国际物流（含货代） <em>¥</em></span><input id="internationalShipping" type="number" min="0" step="0.1" value="67" /></label>
+          <label class="field"><span>获客成本 <em>¥</em></span><input id="acquisitionCost" type="number" min="0" step="0.1" value="0" /></label>
+          <label class="field"><span>退货及其他预留 <em>¥</em></span><input id="returnsReserve" type="number" min="0" step="0.1" value="10" /></label>
+          <label class="field"><span>平台抽佣 <em>%</em></span><input id="commissionRate" type="number" min="0" max="99" step="0.1" value="5" /></label>
+          <label class="field"><span>美元兑人民币 <em>¥</em></span><input id="exchangeRate" type="number" min="0.01" step="0.01" value="6.7" /></label>
+        </div>
+
+        <div class="profit-control">
+          <div class="profit-label-row">
+            <div><span class="field-title">目标利润率</span><small>利润 ÷ 单品售价</small></div>
+            <label class="compact-input"><input id="profitRateInput" type="number" min="0" max="94" step="0.1" value="35" /><span>%</span></label>
+          </div>
+          <input id="profitRateSlider" class="profit-slider" type="range" min="0" max="90" step="0.1" value="35" aria-label="目标利润率滑动条" />
+          <div class="slider-scale"><span>0%</span><span>45%</span><span>90%</span></div>
+        </div>
+
+        <p class="input-note">平台抽佣与利润率均按售价计算；可用输入框精确填写利润率。</p>
+      </section>
+
+      <section class="results-column">
+        <section class="card result-card">
+          <div class="section-heading compact">
+            <div><p class="section-kicker">02 · 计算结果</p><h2>建议单品售价</h2></div>
+            <span id="statusBadge" class="status-badge">计算正常</span>
+          </div>
+          <div id="invalidState" class="invalid-state" hidden>当前费率之和不能达到或超过 100%，请降低利润率或平台抽佣。</div>
+          <div id="resultContent">
+            <div class="price-row">
+              <div class="price-item cny"><span>售价（人民币）</span><strong id="priceCny">¥264.0</strong></div>
+              <div class="price-item usd"><span>售价（美元）</span><strong id="priceUsd">$39.4</strong></div>
+            </div>
+            <div class="metric-grid">
+              <div class="metric profit"><span>目标利润</span><strong id="profitCny">¥52.8</strong><small id="profitUsd">$7.9</small></div>
+              <div class="metric"><span>固定成本</span><strong id="fixedCost">¥198.0</strong><small>不含按售价计费项</small></div>
+              <div class="metric"><span>毛利率</span><strong id="grossMargin">56.4%</strong><small>（售价 − 采购成本）÷ 售价</small></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card formula-card">
+          <div class="section-heading compact"><div><p class="section-kicker">03 · 定价推导过程</p><h2>公式与填充值</h2></div></div>
+          <div class="formula-steps">
+            <div class="formula-step"><span>常规公式</span><p>单品售价 = 采购成本 + 国内物流 + 国际物流（含货代）+ 单品售价 × 平台抽佣百分比 + 获客成本 + 退货预留 + 单品售价 × 利润百分比</p></div>
+            <div class="formula-step"><span>填入值后</span><p id="formulaValues"></p></div>
+            <div class="formula-step"><span>合并固定成本</span><p id="formulaFixed"></p></div>
+            <div class="formula-step"><span>移项求解</span><p id="formulaRearrange"></p></div>
+            <div class="formula-step final"><span>最终结果</span><p id="formulaFinal"></p></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="card table-card">
+        <div class="section-heading compact">
+          <div><p class="section-kicker">04 · 利润档位速查表</p><h2>不同目标利润率下的售价</h2></div>
+          <span class="table-hint">点击行可应用该利润率</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>利润率</th><th class="price-cny">售价（元）</th><th class="price-usd">售价（美元）</th><th class="profit-col">利润（元）</th><th class="profit-col">利润（美元）</th></tr></thead>
+            <tbody id="rateTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+    <footer>提示：本工具用于测算建议售价，实际定价请结合市场价格、税费、促销和汇率波动综合判断。</footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
